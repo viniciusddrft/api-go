@@ -6,7 +6,5 @@ type Tweet struct {
 }
 
 func NewTweet() *Tweet {
-	tweet := Tweet{}
-
-	return &tweet
+	return &Tweet{}
 }

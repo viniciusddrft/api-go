@@ -9,9 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type tweetController struct {
-	tweets []entities.Tweet
-}
+type tweetController struct{}
 
 func NewTweetController() *tweetController {
 	return &tweetController{}
@@ -76,6 +74,7 @@ func (t *tweetController) Create(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, tweet)
 }
+
 func (t *tweetController) Update(ctx *gin.Context) {
 	if ctx.Request.Method != http.MethodPut {
 		ctx.JSON(http.StatusMethodNotAllowed, gin.H{"error": "Método não aceito"})
