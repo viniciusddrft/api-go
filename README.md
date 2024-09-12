@@ -96,3 +96,4 @@ Este projeto é uma API simples escrita em Go que usa PostgreSQL como banco de d
 - `controllers/`: Contém os handlers da API.
 - `db/`: Contém a configuração do banco de dados.
 - `entities/`: Contém as definições de modelos.
+- `routes/`: Contém as rotas da api.
