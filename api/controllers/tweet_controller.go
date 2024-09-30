@@ -1,18 +1,20 @@
 package controllers
 
 import (
-	db "api/api/db"
 	entities "api/api/entities"
+	"database/sql"
 	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-type tweetController struct{}
+type tweetController struct {
+	db *sql.DB
+}
 
-func NewTweetController() *tweetController {
-	return &tweetController{}
+func NewTweetController(db *sql.DB) *tweetController {
+	return &tweetController{db: db}
 }
 
 func (t *tweetController) FindAll(ctx *gin.Context) {
@@ -21,8 +23,7 @@ func (t *tweetController) FindAll(ctx *gin.Context) {
 		return
 	}
 
-	dataBase := db.DB
-	rows, err := dataBase.Query("SELECT * FROM tweets")
+	rows, err := t.db.Query("SELECT * FROM tweets")
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao consultar tweets: " + err.Error()})
 		return
@@ -55,7 +56,6 @@ func (t *tweetController) Create(ctx *gin.Context) {
 		return
 	}
 
-	dataBase := db.DB
 	var tweet entities.Tweet
 
 	if err := ctx.BindJSON(&tweet); err != nil {
@@ -64,7 +64,7 @@ func (t *tweetController) Create(ctx *gin.Context) {
 	}
 
 	var id int64
-	err := dataBase.QueryRow("INSERT INTO tweets (description) VALUES ($1) RETURNING id", tweet.Description).Scan(&id)
+	err := t.db.QueryRow("INSERT INTO tweets (description) VALUES ($1) RETURNING id", tweet.Description).Scan(&id)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao criar tweet: " + err.Error()})
 		return
@@ -81,7 +81,6 @@ func (t *tweetController) Update(ctx *gin.Context) {
 		return
 	}
 
-	dataBase := db.DB
 	id := ctx.Param("id")
 
 	var tweet entities.Tweet
@@ -91,7 +90,7 @@ func (t *tweetController) Update(ctx *gin.Context) {
 		return
 	}
 
-	result, err := dataBase.Exec("UPDATE tweets SET description = $1 WHERE id = $2", tweet.Description, id)
+	result, err := t.db.Exec("UPDATE tweets SET description = $1 WHERE id = $2", tweet.Description, id)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao atualizar tweet: " + err.Error()})
 		return
@@ -118,10 +117,9 @@ func (t *tweetController) Delete(ctx *gin.Context) {
 		return
 	}
 
-	dataBase := db.DB
 	id := ctx.Param("id")
 
-	result, err := dataBase.Exec("DELETE FROM tweets WHERE id = $1", id)
+	result, err := t.db.Exec("DELETE FROM tweets WHERE id = $1", id)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao excluir tweet: " + err.Error()})
 		return
