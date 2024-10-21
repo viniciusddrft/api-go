@@ -9,15 +9,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type tweetController struct {
+type TweetController struct {
 	db *sql.DB
 }
 
-func NewTweetController(db *sql.DB) *tweetController {
-	return &tweetController{db: db}
+func NewTweetController(db *sql.DB) *TweetController {
+	return &TweetController{db: db}
 }
 
-func (t *tweetController) FindAll(ctx *gin.Context) {
+func (t *TweetController) FindAll(ctx *gin.Context) {
 	if ctx.Request.Method != http.MethodGet {
 		ctx.JSON(http.StatusMethodNotAllowed, gin.H{"error": "Método não aceito"})
 		return
@@ -28,7 +28,9 @@ func (t *tweetController) FindAll(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Erro ao consultar tweets: " + err.Error()})
 		return
 	}
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		_ = rows.Close()
+	}(rows)
 
 	var tweets []entities.Tweet
 
@@ -50,7 +52,7 @@ func (t *tweetController) FindAll(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, tweets)
 }
 
-func (t *tweetController) Create(ctx *gin.Context) {
+func (t *TweetController) Create(ctx *gin.Context) {
 	if ctx.Request.Method != http.MethodPost {
 		ctx.JSON(http.StatusMethodNotAllowed, gin.H{"error": "Método não aceito"})
 		return
@@ -75,7 +77,7 @@ func (t *tweetController) Create(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, tweet)
 }
 
-func (t *tweetController) Update(ctx *gin.Context) {
+func (t *TweetController) Update(ctx *gin.Context) {
 	if ctx.Request.Method != http.MethodPut {
 		ctx.JSON(http.StatusMethodNotAllowed, gin.H{"error": "Método não aceito"})
 		return
@@ -111,7 +113,7 @@ func (t *tweetController) Update(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "Tweet atualizado com sucesso"})
 }
 
-func (t *tweetController) Delete(ctx *gin.Context) {
+func (t *TweetController) Delete(ctx *gin.Context) {
 	if ctx.Request.Method != http.MethodDelete {
 		ctx.JSON(http.StatusMethodNotAllowed, gin.H{"error": "Método não aceito"})
 		return

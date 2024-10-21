@@ -16,13 +16,19 @@ func main() {
 	db.InitDB()
 	app := gin.Default()
 	routes.AppRoutes(app)
-	app.Run()
+	err := app.Run()
+	if err != nil {
+		return
+	}
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	go func() {
 		<-c
 		log.Println("Encerrando a conexão com o banco de dados...")
-		db.DB.Close()
+		err = db.DB.Close()
+		if err != nil {
+			return
+		}
 		os.Exit(0)
 	}()
 }
